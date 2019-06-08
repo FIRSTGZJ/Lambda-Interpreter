@@ -33,18 +33,32 @@ public class Interpreter {
     private   AST evalAST(AST ast){
         while(true) {
         	if(isApplication(ast)) {
-        		if(isAbstraction(((Application)ast).lhs)&&isAbstraction(((Application)ast).rhs)){
+        	   if(isIdentifier(((Application)ast).lhs)&&isIdentifier(((Application)ast).rhs)) {
+        		   return ast;
+        	   }
+        	   else if(isIdentifier(((Application)ast).lhs)) {
+        		   ((Application)ast).rhs = evalAST(((Application)ast).rhs);
+        	   }
+        	   else if(isIdentifier(((Application)ast).rhs)) {
+        		   ((Application)ast).lhs = evalAST(((Application)ast).lhs);
+        		   ast = substitute(((Abstraction) ((Application)ast).lhs).body,((Application)ast).rhs);
+        	   }
+        	   else if(isAbstraction(((Application)ast).lhs)&&isAbstraction(((Application)ast).rhs)){
         			ast = substitute(((Abstraction) ((Application)ast).lhs).body,((Application)ast).rhs);
         		}
         		else if(isAbstraction(((Application)ast).lhs)) {
         			((Application)ast).rhs = evalAST(((Application)ast).rhs);
-        		}else if(isAbstraction(((Application)ast).rhs)) {
+        			//ast = substitute(((Abstraction)(((Application)ast).lhs)).body,((Application)ast).rhs);
+        		}
+        		else if(isAbstraction(((Application)ast).rhs)) {
         			((Application)ast).lhs = evalAST(((Application)ast).lhs);
         		}else {
         			((Application)ast).lhs = evalAST(((Application)ast).lhs);
         			((Application)ast).rhs = evalAST(((Application)ast).rhs);
         		}
-        	}else if(isAbstraction(ast)) {
+        	}
+        	else if(isAbstraction(ast)) {
+        		((Abstraction)ast).body = evalAST(((Abstraction)ast).body);
         		return ast;
         	}else return ast;
         }
@@ -163,7 +177,6 @@ public class Interpreter {
     public static void main(String[] args) {
         // write your code here
 
-
         String[] sources = {
                 ZERO,//0
                 ONE,//1
@@ -199,9 +212,8 @@ public class Interpreter {
                 app(MIN, FOUR, TWO),//31
         };
 
-        for(int i=0 ; i<sources.length; i++) {
-
-
+//        for(int i=0 ; i<sources.length; i++) {
+        	int i=1;
             String source = sources[i];
 
             System.out.println(i+":"+source);
@@ -216,7 +228,7 @@ public class Interpreter {
 
             System.out.println(i+":" + result.toString());
 
-        }
+//        }
 
     }
 }
