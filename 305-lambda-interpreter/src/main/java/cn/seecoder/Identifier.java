@@ -6,12 +6,10 @@ public class Identifier extends AST {
     String value;//De Bruijn index值
 
     public Identifier(String n,String v){
-
         name = n;
         value = v;
     }
     public String toString(){
-
-        return "";
+        return this.value;
     }
 }

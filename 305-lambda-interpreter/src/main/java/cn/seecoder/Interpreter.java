@@ -167,7 +167,7 @@ public class Interpreter {
             System.out.println(i+":"+source);
 
             Lexer lexer = new Lexer(source);
-
+//            System.out.println("dygqwgyd");
             Parser parser = new Parser(lexer);
 
             Interpreter interpreter = new Interpreter(parser);
