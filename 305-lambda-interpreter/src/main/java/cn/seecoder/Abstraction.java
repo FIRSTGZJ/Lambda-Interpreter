@@ -12,7 +12,7 @@ public class Abstraction extends AST {
 
     public String toString(){
     	//body.toString()调用哪个子类方法由虚拟机决定，即由传进来的b的类型决定
-    	String m = "\\."+this.body.toString();
+    	String m = "（\\."+this.body.toString()+")";
     	return m;
     }
 }
