@@ -1,5 +1,10 @@
 package cn.seecoder;
 
+//解释器
+/*规则：
+首先检测其是否为 application，如果是，则对其求值： - 若 abstraction 的两侧都是值，只要将所有出现的 x 用给出的值替换掉； (3) - 否则，若左侧为值，给右侧求值；(2) - 如果上面都不行，只对左侧求值；(1)
+现在，如果下一个节点是 identifier，我们只需将它替换为它所表示的变量绑定的值。
+最后，如果没有*/
 public class Interpreter {
     Parser parser;
     AST astAfterParser;
@@ -22,22 +27,30 @@ public class Interpreter {
     }
 
     public AST eval(){
-
         return evalAST(astAfterParser);
     }
 
     private   AST evalAST(AST ast){
-        //write your code here
-
-        return null;
-
+        while(true) {
+        	if(isApplication(ast)) {
+        		if(isAbstraction(((Application)ast).lhs)&&isAbstraction(((Application)ast).rhs)){
+        			ast = substitute(((Abstraction) ((Application)ast).lhs).body,((Application)ast).rhs);
+        		}
+        		else if(isAbstraction(((Application)ast).lhs)) {
+        			((Application)ast).rhs = evalAST(((Application)ast).rhs);
+        		}else if(isAbstraction(((Application)ast).rhs)) {
+        			((Application)ast).lhs = evalAST(((Application)ast).lhs);
+        		}else {
+        			((Application)ast).lhs = evalAST(((Application)ast).lhs);
+        			((Application)ast).rhs = evalAST(((Application)ast).rhs);
+        		}
+        	}else if(isAbstraction(ast)) {
+        		return ast;
+        	}else return ast;
+        }
     }
     private AST substitute(AST node,AST value){
-
         return shift(-1,subst(node,shift(1,value,0),0),0);
-
-
-
     }
 
     /**
@@ -56,10 +69,26 @@ public class Interpreter {
 
 
      */
+    /**
+     * process of substitute
+     *        app
+     *       /  \
+     *      abs  abs(value)  ::the former:node
+     *     /  \
+     * param  body
+     * app->substitute(value,body)->the outermost param was dropped out
+     **/
     private AST subst(AST node, AST value, int depth){
-        //write your code here
-
-        return null;
+        if(isApplication(node)) {
+        	return new Application(subst(((Application)node).lhs, value, depth),subst(((Application)node).rhs, value, depth));
+        }else if(isAbstraction(node)) {
+        	return new Abstraction(((Abstraction)node).param, subst(((Abstraction)node).body, value,depth+1));
+        }else if(isIdentifier(node)) {
+        	if(depth == Integer.parseInt(((Identifier)node).value)) {
+        		return shift(depth,value,depth);
+        	}else return node;
+        }
+        return node;
 
     }
 
@@ -68,9 +97,11 @@ public class Interpreter {
      *  De Bruijn index值位移
      *  如果节点是Applation，分别对左右树位移；
      *  如果node节点是abstraction，新的body等于旧node.body位移by（from得+1）；
-     *  如果node是identifier，则新的identifier的De Bruijn index值如果大于等于from则加by，否则加0（超出内层的范围的外层变量才要shift by位）.
+     *  如果node是identifier，则新的identifier的De Bruijn index值如
+                  果大于等于from则加by，否则加0（超出内层的范围的外层变量才要
+        shift by位）.
 
-        *@param by 位移的距离
+     *@param by 位移的距离
      *@param node 位移的节点
      *@param from 内层的深度
 
@@ -83,10 +114,19 @@ public class Interpreter {
 
     private AST shift(int by, AST node,int from){
         //write your code here
-
-        return null;
-
+    	if(isApplication(node)) {
+    		return new Application(shift(by,((Application)node).lhs,from),shift(by,((Application)node).rhs,from));
+    	}
+    	else if(isAbstraction(node)) {
+    		return new Abstraction((Identifier) ((Abstraction)node).param,shift(by, ((Abstraction)node).body, from+1));
+    	}
+    	else if(isIdentifier(node)) {
+    			int temp = Integer.parseInt(((Identifier)node).value);
+    			return new Identifier(((Identifier)node).name , String.valueOf(temp + (temp >= from ? by : 0)));
+    	}else return node;
     }
+
+
     static String ZERO = "(\\f.\\x.x)";
     static String SUCC = "(\\n.\\f.\\x.f (n f x))";
     static String ONE = app(SUCC, ZERO);
@@ -167,7 +207,7 @@ public class Interpreter {
             System.out.println(i+":"+source);
 
             Lexer lexer = new Lexer(source);
-//            System.out.println("dygqwgyd");
+
             Parser parser = new Parser(lexer);
 
             Interpreter interpreter = new Interpreter(parser);
