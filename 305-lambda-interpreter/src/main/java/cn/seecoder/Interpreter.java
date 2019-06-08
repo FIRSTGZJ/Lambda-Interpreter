@@ -31,37 +31,37 @@ public class Interpreter {
     }
 
     private   AST evalAST(AST ast){
-        while(true) {
-        	if(isApplication(ast)) {
-        	   if(isIdentifier(((Application)ast).lhs)&&isIdentifier(((Application)ast).rhs)) {
-        		   return ast;
-        	   }
-        	   else if(isIdentifier(((Application)ast).lhs)) {
-        		   ((Application)ast).rhs = evalAST(((Application)ast).rhs);
-        	   }
-        	   else if(isIdentifier(((Application)ast).rhs)) {
-        		   ((Application)ast).lhs = evalAST(((Application)ast).lhs);
-        		   ast = substitute(((Abstraction) ((Application)ast).lhs).body,((Application)ast).rhs);
-        	   }
-        	   else if(isAbstraction(((Application)ast).lhs)&&isAbstraction(((Application)ast).rhs)){
-        			ast = substitute(((Abstraction) ((Application)ast).lhs).body,((Application)ast).rhs);
-        		}
-        		else if(isAbstraction(((Application)ast).lhs)) {
-        			((Application)ast).rhs = evalAST(((Application)ast).rhs);
-        			//ast = substitute(((Abstraction)(((Application)ast).lhs)).body,((Application)ast).rhs);
-        		}
-        		else if(isAbstraction(((Application)ast).rhs)) {
-        			((Application)ast).lhs = evalAST(((Application)ast).lhs);
-        		}else {
-        			((Application)ast).lhs = evalAST(((Application)ast).lhs);
-        			((Application)ast).rhs = evalAST(((Application)ast).rhs);
-        		}
-        	}
-        	else if(isAbstraction(ast)) {
-        		((Abstraction)ast).body = evalAST(((Abstraction)ast).body);
-        		return ast;
-        	}else return ast;
-        }
+    	while(true){
+    		//只在最简时返回，其他为递归
+    		if(isValue(ast)) return ast;
+    		else if(isApplication(ast)){
+    			if(isValue(((Application)ast).lhs)&&isValue(((Application)ast).rhs)){
+    				//此时必不是最简形式，需要化简
+    				ast = substitute(((Abstraction)((Application)ast).lhs).body,((Application)ast).rhs);
+    			}//左侧最简，化简右式
+    			else if(isValue(((Application)ast).lhs)){
+    				((Application)ast).rhs = evalAST(((Application)ast).rhs);
+    			}//右侧最简，化简左式
+    			else ((Application)ast).lhs = evalAST(((Application)ast).lhs);
+    		}
+    		else if(isAbstraction(ast))  ((Abstraction)ast).body = evalAST(((Abstraction)ast).body);
+    	}
+    }
+    
+  //判断是否为最简形式
+    public boolean isValue(AST ast){
+    	if(isIdentifier(ast))  return true;
+    	else if(isApplication(ast)){
+    		//App的lhs是Abs，则右边可以代入左边，故非最简
+    		if(isAbstraction(((Application)ast).lhs)) return false;
+    		//确保一定不是
+    		else return isValue(((Application)ast).lhs)&&isValue(((Application)ast).rhs);
+    	} 
+    	else if(isAbstraction(ast)){
+    		//Abs只有body也是ide时才是最简
+    		if(isValue(((Abstraction)ast).body)) return true;
+    		else return false;
+    	}else return false;
     }
     private AST substitute(AST node,AST value){
         return shift(-1,subst(node,shift(1,value,0),0),0);
@@ -125,7 +125,6 @@ public class Interpreter {
 
 
      */
-
     private AST shift(int by, AST node,int from){
         //write your code here
     	if(isApplication(node)) {
@@ -140,7 +139,7 @@ public class Interpreter {
     	}else return node;
     }
 
-
+    
     static String ZERO = "(\\f.\\x.x)";
     static String SUCC = "(\\n.\\f.\\x.f (n f x))";
     static String ONE = app(SUCC, ZERO);
@@ -213,7 +212,6 @@ public class Interpreter {
         };
 
           for(int i=0 ; i<sources.length; i++) {
-//        	int i=1;
             String source = sources[i];
 
             System.out.println(i+":"+source);
@@ -229,6 +227,5 @@ public class Interpreter {
             System.out.println(i+":" + result.toString());
 
           }
-
     }
 }
