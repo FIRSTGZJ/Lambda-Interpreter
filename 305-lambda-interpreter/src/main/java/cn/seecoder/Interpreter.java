@@ -212,8 +212,8 @@ public class Interpreter {
                 app(MIN, FOUR, TWO),//31
         };
 
-//        for(int i=0 ; i<sources.length; i++) {
-        	int i=1;
+          for(int i=0 ; i<sources.length; i++) {
+//        	int i=1;
             String source = sources[i];
 
             System.out.println(i+":"+source);
@@ -228,7 +228,7 @@ public class Interpreter {
 
             System.out.println(i+":" + result.toString());
 
-//        }
+          }
 
     }
 }
