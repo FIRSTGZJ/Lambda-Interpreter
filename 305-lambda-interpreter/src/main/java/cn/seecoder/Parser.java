@@ -59,8 +59,9 @@ public class Parser {
     		AST term = this.term(ctx);
     		this.lexer.match(TokenType.RPAREN);
     		return term;
-    	}else if(this.lexer.skip(TokenType.LCID)) {
+    	}else if(this.lexer.next(TokenType.LCID)) {
     		String id = this.lexer.tokenvalue;
+    		this.lexer.match(TokenType.LCID);
     		return new Identifier(id,String.valueOf(ctx.indexOf(id)));
     	}else return null;
     }
