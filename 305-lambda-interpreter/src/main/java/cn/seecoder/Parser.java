@@ -30,8 +30,7 @@ public class Parser {
 	    		temp.addAll(ctx);
 	    		AST term = this.term(temp);  //x y z 2 1 0
 	    		//term是application,举例可证代码\x.\y.\z.xyz
-	    		Identifier iden = new Identifier(temp.get(temp.size()-1),String.valueOf(temp.size()-1));
-	    		return new Abstraction(iden,term);       //temp内容减少，用完就扔
+	    		return new Abstraction(new Identifier(id,String.valueOf(temp.indexOf(id))),term);       //temp内容减少，用完就扔
 	    		//返回一个Abstraction类型，以第一个id为形参，term为body
 	    	}else 	return this.application(ctx);
     }
