@@ -99,7 +99,7 @@ public class Interpreter {
         	return new Abstraction(((Abstraction)node).param, subst(((Abstraction)node).body, value,depth+1));
         }else if(isIdentifier(node)) {
         	if(depth == Integer.parseInt(((Identifier)node).value)) {
-        		return shift(depth,value,depth);          //from：0
+        		return shift(depth,value,0);          //from：0
         	}else return node;
         }
         return node;
