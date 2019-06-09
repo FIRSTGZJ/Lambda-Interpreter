@@ -1,4 +1,4 @@
-﻿package cn.seecoder;
+package cn.seecoder;
 
 //解释器
 /*规则：
