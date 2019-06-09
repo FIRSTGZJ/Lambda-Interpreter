@@ -1,4 +1,4 @@
-package cn.seecoder;
+﻿package cn.seecoder;
 
 //解释器
 /*规则：
@@ -12,7 +12,7 @@ public class Interpreter {
     public Interpreter(Parser p){
         parser = p;
         astAfterParser = p.parse();
-        //System.out.println("After parser:"+astAfterParser.toString());
+        System.out.println("After parser:"+astAfterParser.toString());
     }
 
 
@@ -36,7 +36,7 @@ public class Interpreter {
     		if(isValue(ast)) return ast;
     		else if(isApplication(ast)){
     			if(isValue(((Application)ast).lhs)&&isValue(((Application)ast).rhs)){
-    				//此时必不是最简形式，需要化简
+    				//此时必不是最简形式，左边必为Abstraction，需要化简
     				ast = substitute(((Abstraction)((Application)ast).lhs).body,((Application)ast).rhs);
     			}//左侧最简，化简右式
     			else if(isValue(((Application)ast).lhs)){
@@ -99,7 +99,7 @@ public class Interpreter {
         	return new Abstraction(((Abstraction)node).param, subst(((Abstraction)node).body, value,depth+1));
         }else if(isIdentifier(node)) {
         	if(depth == Integer.parseInt(((Identifier)node).value)) {
-        		return shift(depth,value,depth);
+        		return shift(depth,value,0);          //from：0
         	}else return node;
         }
         return node;
@@ -211,7 +211,8 @@ public class Interpreter {
                 app(MIN, FOUR, TWO),//31
         };
 
-          for(int i=0 ; i<sources.length; i++) {
+        for(int i=0; i<sources.length; i++) {
+        
             String source = sources[i];
 
             System.out.println(i+":"+source);
